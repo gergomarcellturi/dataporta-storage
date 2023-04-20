@@ -3,6 +3,8 @@ package com.dataportal.datastorage.service;
 import com.dataportal.datastorage.entity.DatasourceDetails;
 import com.dataportal.datastorage.entity.Tag;
 import com.dataportal.datastorage.exception.ApplicationException;
+import com.dataportal.datastorage.model.DataAccess;
+import com.dataportal.datastorage.model.DataDownloadAccess;
 import com.dataportal.datastorage.model.common.Response;
 import com.dataportal.datastorage.model.request.DatasourceUpdate;
 import com.dataportal.datastorage.model.response.UploadResponse;
@@ -16,7 +18,6 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.dataportal.datastorage.entity.Datasource;
 import com.dataportal.datastorage.entity.Metadata;
 import com.dataportal.datastorage.model.DatasourceStatus;
-import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,8 @@ public class DataService {
         metadata.setDateDeleted(null);
         metadata.setDatePublished(null);
         metadata.setStatus(DatasourceStatus.NEW);
+        metadata.setDataAccess(DataAccess.PUBLIC);
+        metadata.setDataDownloadAccess(DataDownloadAccess.PUBLIC);
 
         final Metadata savedMetadata = metadataRepository.save(metadata);
         LOGGER.info(String.format("Metadata created with ID: %s", savedMetadata.getUid()));
@@ -85,6 +88,8 @@ public class DataService {
         data.put("uid", metadata.getUid());
         data.put("status", metadata.getStatus().toString());
         data.put("filename", metadata.getFilename());
+        data.put("dataAccess", metadata.getDataAccess());
+        data.put("downloadAccess", metadata.getDataDownloadAccess());
         data.put("size", metadata.getSize());
         data.put("tags", datasourceDetails.getTags().stream().map(tag -> {
             Map<String, Object> tagData = new HashMap<>();
@@ -287,10 +292,7 @@ public class DataService {
     public DatasourceUpdate datasourceUpdate(final DatasourceUpdate datasourceUpdate) {
         Metadata savedMetadata = this.metadataRepository.save(datasourceUpdate.getMetadata());
         DatasourceDetails savedDetails = this.datasourceDetailsRepository.save(datasourceUpdate.getDatasourceDetails());
-
-        CompletableFuture.runAsync(() -> {
-            updatePreview(savedMetadata);
-        });
+        updatePreview(savedMetadata);
         DatasourceUpdate updateResponse = new DatasourceUpdate();
         updateResponse.setMetadata(savedMetadata);
         updateResponse.setDatasourceDetails(savedDetails);

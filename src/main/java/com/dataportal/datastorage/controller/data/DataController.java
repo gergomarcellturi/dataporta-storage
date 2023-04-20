@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import com.dataportal.datastorage.service.DataService;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 
 @RestController

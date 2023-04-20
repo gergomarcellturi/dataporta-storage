@@ -1,6 +1,8 @@
 package com.dataportal.datastorage.entity;
 
 
+import com.dataportal.datastorage.model.DataAccess;
+import com.dataportal.datastorage.model.DataDownloadAccess;
 import lombok.Data;
 import com.dataportal.datastorage.model.DatasourceStatus;
 import com.dataportal.datastorage.model.FileType;
@@ -39,6 +41,14 @@ public class Metadata {
     @Column
     @Enumerated(EnumType.STRING)
     private DatasourceStatus status;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private DataAccess dataAccess;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private DataDownloadAccess dataDownloadAccess;
 
     @Column
     private Instant datePublished;
