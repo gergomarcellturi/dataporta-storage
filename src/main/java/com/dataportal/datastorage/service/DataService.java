@@ -81,25 +81,59 @@ public class DataService {
 
     public Map<String, Object> getPreviewData(Metadata metadata, DatasourceDetails datasourceDetails) {
         Map<String, Object> data = new HashMap<>();
+        List<String> titleNgrams = generateNgrams(datasourceDetails.getTitle().toLowerCase(), 3);
+        List<String> summaryNgrams = generateNgrams(datasourceDetails.getSummary().toLowerCase(), 3);
+        List<Map<String, Object>> tagsWithNgrams = createTagsWithNgrams(datasourceDetails.getTags(), 3);
+
+
+        List<String> allTagsNgrams = new ArrayList<>();
+        for (Tag tag : datasourceDetails.getTags()) {
+            String tagTitleLower = tag.getTitle().toLowerCase();
+            List<String> tagTitleNgrams = generateNgrams(tagTitleLower, 3);
+            allTagsNgrams.addAll(tagTitleNgrams);
+        }
+
         data.put("type", metadata.getType().toString());
         data.put("userUid", metadata.getUserUid());
         data.put("title", datasourceDetails.getTitle());
+        data.put("titleLower", datasourceDetails.getTitle().toLowerCase());
+        data.put("titleNgrams", titleNgrams);
         data.put("summary", datasourceDetails.getSummary());
+        data.put("summaryLower", datasourceDetails.getSummary().toLowerCase());
+        data.put("summaryNgrams", summaryNgrams);
         data.put("uid", metadata.getUid());
         data.put("status", metadata.getStatus().toString());
         data.put("filename", metadata.getFilename());
         data.put("dataAccess", metadata.getDataAccess());
         data.put("downloadAccess", metadata.getDataDownloadAccess());
         data.put("size", metadata.getSize());
-        data.put("tags", datasourceDetails.getTags().stream().map(tag -> {
-            Map<String, Object> tagData = new HashMap<>();
-            tagData.put("title", tag.getTitle());
-            tagData.put("uid", tag.getUid());
-            return tagData;
-        }).collect(Collectors.toList()));
+        data.put("tags", tagsWithNgrams);
+        data.put("allTagsNgrams", allTagsNgrams);
         data.put("lastModified", Timestamp.ofTimeMicroseconds(datasourceDetails.getLastModified().toEpochMilli()));
         data.put("createdAt", Timestamp.ofTimeMicroseconds(datasourceDetails.getCreatedAt().toEpochMilli()));
         return data;
+    }
+
+    public static List<String> generateNgrams(String text, int n) {
+        List<String> ngrams = new ArrayList<>();
+        for (int i = 0; i < text.length() - n + 1; i++) {
+            ngrams.add(text.substring(i, i + n));
+        }
+        return ngrams;
+    }
+
+    public List<Map<String, Object>> createTagsWithNgrams(List<Tag> tags, int n) {
+        List<Map<String, Object>> tagsWithNgrams = new ArrayList<>();
+        for (Tag tag : tags) {
+            Map<String, Object> tagWithNgrams = new HashMap<>();
+            String tagTitle = tag.getTitle();
+            String tagTitleLower = tagTitle.toLowerCase();
+            List<String> tagTitleNgrams = generateNgrams(tagTitleLower, n);
+            tagWithNgrams.put("title", tagTitle);
+            tagWithNgrams.put("titleNgrams", tagTitleNgrams);
+            tagsWithNgrams.add(tagWithNgrams);
+        }
+        return tagsWithNgrams;
     }
 
     public Metadata finalizeDatasource(final DatasourceDetails datasourceDetails, final String metadataId) {

@@ -4,10 +4,8 @@ import com.dataportal.datastorage.entity.Datasource;
 import com.dataportal.datastorage.entity.Metadata;
 import com.dataportal.datastorage.exception.ApplicationException;
 import com.dataportal.datastorage.model.common.Response;
-import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -79,7 +77,8 @@ public class DataApiService {
     }
 
     public boolean canAccess(Metadata metadata, String apiKey) throws ExecutionException, InterruptedException {
-        if (apiKey != null && Objects.equals(getUserUidFromApiKey(apiKey), metadata.getUserUid())) {
+        final String requestingUserUid = getUserUidFromApiKey(apiKey);
+        if (apiKey != null && Objects.equals(requestingUserUid, metadata.getUserUid())) {
             return true;
         }
         switch (metadata.getDataAccess()) {
@@ -89,13 +88,25 @@ public class DataApiService {
                 return getUserUidFromApiKey(apiKey) != null;
             case PRIVATE: return (Objects.equals(getUserUidFromApiKey(apiKey), metadata.getUserUid()));
             case REQUEST:
+                this.updateAccessed(metadata, requestingUserUid);
                 Firestore firestore = FirestoreClient.getFirestore();
                 DocumentReference docRef =
-                        firestore.collection("metadata_preview").document(metadata.getUid()).collection("access").document(apiKey);
+                        firestore.collection("metadata_preview").document(metadata.getUid()).collection("access").document(requestingUserUid);
                 DocumentSnapshot snap = docRef.get().get();
                 return (snap.exists() && Boolean.TRUE.equals(snap.get("canAccess", Boolean.class)));
         }
         return false;
+    }
+
+    public void updateAccessed(Metadata metadata, String userUid) {
+        Firestore firestore = FirestoreClient.getFirestore();
+        DocumentReference docRef =
+                firestore.collection("metadata_preview").document(metadata.getUid()).collection("access").document(userUid);
+        firestore.runTransaction(transaction -> {
+            Timestamp timestamp = Timestamp.now();
+            transaction.update(docRef, "accesses", FieldValue.arrayUnion(timestamp));
+            return null;
+        });
     }
 
 
