@@ -20,7 +20,7 @@ public class JwtInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7); // Extract the token from the header
+            String token = authorizationHeader.substring(7);
             try {
                 FirebaseToken decodedToken = firebaseAuth.verifyIdToken(token);
                 return decodedToken.getUid() != null;

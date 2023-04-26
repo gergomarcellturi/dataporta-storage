@@ -60,7 +60,6 @@ public class DataApiService {
         headers.setContentLength(fileChunk.length);
         headers.set("X-Total-Pages", String.valueOf(getTotalPages(datasource, pageSize)));
         return new ResponseEntity<>(fileChunk, headers, HttpStatus.OK);
-
     }
 
     public byte[] getFileChunkByPage(Datasource datasource, int page, int pageSize) {
