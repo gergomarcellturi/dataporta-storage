@@ -81,8 +81,14 @@ public class DataService {
 
     public Map<String, Object> getPreviewData(Metadata metadata, DatasourceDetails datasourceDetails) {
         Map<String, Object> data = new HashMap<>();
-        List<String> titleNgrams = generateNgrams(datasourceDetails.getTitle().toLowerCase(), 3);
-        List<String> summaryNgrams = generateNgrams(datasourceDetails.getSummary().toLowerCase(), 3);
+        List<String> titleNgrams = null;
+        List<String> summaryNgrams = null;
+        if (datasourceDetails.getTitle() != null) {
+            titleNgrams = generateNgrams(datasourceDetails.getTitle().toLowerCase(), 3);
+        }
+        if (datasourceDetails.getSummary() != null) {
+            summaryNgrams = generateNgrams(datasourceDetails.getSummary().toLowerCase(), 3);
+        }
         List<Map<String, Object>> tagsWithNgrams = createTagsWithNgrams(datasourceDetails.getTags(), 3);
 
 
@@ -97,10 +103,10 @@ public class DataService {
         data.put("userUid", metadata.getUserUid());
         data.put("title", datasourceDetails.getTitle());
         data.put("titleLower", datasourceDetails.getTitle().toLowerCase());
-        data.put("titleNgrams", titleNgrams);
         data.put("summary", datasourceDetails.getSummary());
-        data.put("summaryLower", datasourceDetails.getSummary().toLowerCase());
-        data.put("summaryNgrams", summaryNgrams);
+        if (datasourceDetails.getSummary() != null) {
+            data.put("summaryLower", datasourceDetails.getSummary().toLowerCase());
+        }
         data.put("uid", metadata.getUid());
         data.put("status", metadata.getStatus().toString());
         data.put("filename", metadata.getFilename());
@@ -148,7 +154,7 @@ public class DataService {
         CompletableFuture.runAsync(() -> {
             Firestore firestore = FirestoreClient.getFirestore();
             CollectionReference collection = firestore.collection("metadata_preview");
-            DocumentReference docRef =  collection.document(metadata.getUid());
+            DocumentReference docRef = collection.document(metadata.getUid());
             Map<String, Object> data = getPreviewData(metadata, datasourceDetails);
             docRef.set(data);
         });
@@ -157,7 +163,7 @@ public class DataService {
 
     public List<Tag> saveTags(List<Tag> tags) {
         List<Tag> savedTags = new ArrayList<>();
-        for (Tag tag: tags) {
+        for (Tag tag : tags) {
             if (tag.getUid() != null) {
                 savedTags.add(tag);
             } else {
@@ -171,7 +177,7 @@ public class DataService {
                 }
             }
         }
-    return savedTags;
+        return savedTags;
     }
 
     public UploadResponse uploadFile(final String metadataId, final MultipartFile file) throws ExecutionException, InterruptedException {
@@ -210,7 +216,7 @@ public class DataService {
             MultipartFile file,
             Map<String, Object> progressData,
             DocumentReference docRef
-            ) throws IOException {
+    ) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
         long totalLines = reader.lines().count();
         reader.close();
