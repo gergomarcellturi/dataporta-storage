@@ -17,7 +17,7 @@
 		<java.version>14</java.version>
 	</properties>
 	<dependencies>
-		asdwafawfawef
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -29,7 +29,7 @@
 			<scope>test</scope>
 		</dependency>
 
-	gaewrgaergaerhgaehhtrhtrhtrhtrhtrhtr
+	gaewrgaergaerhgaehhtrhtrhtrhtrhtrhtr - fawe4gfa3w4tg3egt54g35
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
