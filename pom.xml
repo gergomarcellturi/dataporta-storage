@@ -28,7 +28,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		anyád
+		Főmenü
 		<dependency>
 			<groupId>org.sprinjdr6dr6gframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
